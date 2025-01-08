@@ -8,7 +8,7 @@ import file_managment.path_config as PathConfig
 
 def main():
     try:
-        driver_path, gz_folder, unzipped_folder = PathConfig.setup_paths()
+        driver_path, gz_folder, unzipped_folder, processed_folder = PathConfig.setup_paths()
         driver = Scraper.initialize_driver(driver_path)
         driver.get("https://xenabrowser.net/datapages/?hub=https://tcga.xenahubs.net:443")
         sleep(3)
@@ -27,7 +27,7 @@ def main():
                 pass
 
             FileManager.wait_for_all_downloads()
-            FileManager.process_gz_files(gz_folder, unzipped_folder)
+            FileManager.process_gz_files(gz_folder, unzipped_folder, processed_folder)
 
     except Exception as e:
         raise Exception(f"Error: {e}")

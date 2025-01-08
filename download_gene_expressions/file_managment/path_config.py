@@ -15,8 +15,10 @@ def setup_paths():
 
     gz_folder = user_path('Downloads', 'gz_files')
     unzipped_folder = user_path('Downloads', 'unzipped_files')
+    processed_folder = user_path('Downloads', 'processed_files')
 
     create_directory(gz_folder)
     create_directory(unzipped_folder)
+    create_directory(processed_folder)
 
-    return driver_path, gz_folder, unzipped_folder
+    return driver_path, gz_folder, unzipped_folder, processed_folder

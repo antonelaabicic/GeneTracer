@@ -4,7 +4,6 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
-from urllib.parse import urljoin
 
 def initialize_driver(driver_path):
     driver = webdriver.Chrome(service=Service(driver_path))
