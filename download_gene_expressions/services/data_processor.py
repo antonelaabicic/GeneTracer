@@ -9,6 +9,10 @@ def check_files_in_bucket(bucket_name, required_file_count):
         return False
     return files
 
+def extract_cancer_cohort(file_name):
+    parts = file_name.split(".")
+    return parts[1] if len(parts) > 1 else "Unknown"
+
 def merge_gene_and_clinical_data(clinical_file_name, bucket_name):
     try:
         clinical_response = minio_client.get_object(bucket_name, clinical_file_name)
@@ -36,9 +40,14 @@ def merge_gene_and_clinical_data(clinical_file_name, bucket_name):
                 if 'Gene' in gene_data.columns:
                     gene_data.rename(columns={'Gene': 'bcr_patient_barcode'}, inplace=True)
 
+                cancer_cohort = extract_cancer_cohort(file_name)
+                gene_data["cancer_cohort"] = cancer_cohort
+
                 merged = gene_data.merge(clinical_data, on="bcr_patient_barcode", how="inner")
                 merged["patient_id"] = range(1, len(merged) + 1)
-                cols = ["patient_id"] + [col for col in merged.columns if col != "patient_id"]
+
+                cols = ["patient_id", "bcr_patient_barcode", "cancer_cohort"] + \
+                       [col for col in merged.columns if col not in ["patient_id", "bcr_patient_barcode", "cancer_cohort"]]
                 merged = merged[cols]
                 merged_data.append(merged)
 
