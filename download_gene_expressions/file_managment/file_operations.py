@@ -4,6 +4,7 @@ import gzip
 import shutil
 import csv
 from file_managment.path_config import user_path
+from services.minio_service import upload_to_minio
 
 download_path = user_path('Downloads')
 GENES_OF_INTEREST = [
@@ -33,7 +34,7 @@ def wait_until_file_is_available(file_path, timeout=60):
             time.sleep(1)
     raise Exception(f"Timeout waiting for file to become available: {file_path}")
 
-def manipulate_files(file_name, zipped_folder, unzipped_folder, processed_folder):
+def manipulate_files(file_name, zipped_folder, unzipped_folder):
     gz_file_path = os.path.join(download_path, file_name)
     extracted_file_name = os.path.splitext(file_name)[0]
     extracted_file_path = os.path.join(unzipped_folder, extracted_file_name)
@@ -46,10 +47,11 @@ def manipulate_files(file_name, zipped_folder, unzipped_folder, processed_folder
                 shutil.copyfileobj(gz_file, extracted_file)
         shutil.move(gz_file_path, os.path.join(zipped_folder, file_name))
 
-        processed_file_name = f"processed_{extracted_file_name}"
-        processed_file_path = os.path.join(processed_folder, processed_file_name)
+        processed_file_name = f"processed_{extracted_file_name}.tsv"
+        processed_file_path = os.path.join(unzipped_folder, processed_file_name)
 
         manipulate_and_save_tsv(extracted_file_path, processed_file_path)
+        upload_to_minio(processed_file_path, processed_file_name)
     except Exception as e:
         raise Exception(f"Failed to extract {file_name}: {e}")
 
@@ -59,7 +61,7 @@ def manipulate_and_save_tsv(input_file_path, output_file_path):
             reader = csv.reader(tsv_file, delimiter='\t')
             header = next(reader)
 
-            sample_ids = header[1:]  
+            sample_ids = [sample[:-3] if len(sample) > 3 else sample for sample in header[1:]]
             gene_data = {gene: [] for gene in GENES_OF_INTEREST}
 
             for row in reader:
@@ -76,7 +78,7 @@ def manipulate_and_save_tsv(input_file_path, output_file_path):
     except Exception as e:
         raise Exception(f"Failed to manipulate data in {input_file_path}: {e}")
 
-def process_gz_files(gz_folder, unzipped_folder, processed_folder):
+def process_gz_files(gz_folder, unzipped_folder):
     for file_name in os.listdir(download_path):
         if file_name.endswith('.gz'):
-            manipulate_files(file_name, gz_folder, unzipped_folder, processed_folder)
+            manipulate_files(file_name, gz_folder, unzipped_folder)

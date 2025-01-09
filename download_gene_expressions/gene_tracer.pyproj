@@ -26,10 +26,14 @@
     <Compile Include="file_managment\path_config.py" />
     <Compile Include="main.py" />
     <Compile Include="scraping\selenium_setup.py" />
+    <Compile Include="services\data_processor.py" />
+    <Compile Include="services\minio_service.py" />
+    <Compile Include="services\mongo_service.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="drivers\" />
     <Folder Include="file_managment\" />
+    <Folder Include="services\" />
     <Folder Include="scraping\" />
   </ItemGroup>
   <ItemGroup>
